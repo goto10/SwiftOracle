@@ -44,15 +44,15 @@ public enum DataTypes {
 
 
 
-open class Cursor : Sequence, IteratorProtocol {
+public class Cursor : Sequence, IteratorProtocol {
     
-    open var resultPointer: OpaquePointer?
-    fileprivate var statementPointer: OpaquePointer
-    fileprivate let connection: OpaquePointer
+    public var resultPointer: OpaquePointer?
+    private var statementPointer: OpaquePointer
+    private let connection: OpaquePointer
     
-    fileprivate var _columns: [Column]?
+    private var _columns: [Column]?
     
-    fileprivate var binded_vars: [BindVar] = []
+    private var binded_vars: [BindVar] = []
     
     public init(connection: OpaquePointer) {
         self.connection = connection
@@ -62,10 +62,10 @@ open class Cursor : Sequence, IteratorProtocol {
     deinit {
         clear()
     }
-    open func clear() {
+    public func clear() {
         OCI_StatementFree(statementPointer)
     }
-    fileprivate func get_columns() -> [Column] {
+    private func get_columns() -> [Column] {
         guard let resultPointer=self.resultPointer else {
             return []
         }
@@ -84,7 +84,7 @@ open class Cursor : Sequence, IteratorProtocol {
         }
         return result
     }
-    open var affected: Int {
+    public var affected: Int {
         return Int(OCI_GetAffectedRows(statementPointer))
     }
     
@@ -97,12 +97,12 @@ open class Cursor : Sequence, IteratorProtocol {
         resultPointer = nil
     }
     
-    open func bind(_ name: String, bindVar: BindVar) {
+    public func bind(_ name: String, bindVar: BindVar) {
         bindVar.bind(statementPointer, name)
         binded_vars.append(bindVar)
     }
     
-    open func register(_ name: String, type: DataTypes) {
+    public func register(_ name: String, type: DataTypes) {
         switch type {
         case .int:
             OCI_RegisterInt(statementPointer, name)
@@ -111,7 +111,7 @@ open class Cursor : Sequence, IteratorProtocol {
         }
     }
     
-    open func execute(_ statement: String, params: [String: BindVar]=[:], register: [String: DataTypes]=[:]) throws {
+    public func execute(_ statement: String, params: [String: BindVar]=[:], register: [String: DataTypes]=[:]) throws {
         reset()
         let prepared = OCI_Prepare(statementPointer, statement)
         assert(prepared == 1)
@@ -123,11 +123,11 @@ open class Cursor : Sequence, IteratorProtocol {
         }
         let executed = OCI_Execute(statementPointer);
         if executed != 1{
-            throw DatabaseErrors.notExecuted
+            throw DatabaseErrors.NotExecuted
         }
         resultPointer = OCI_GetResultset(statementPointer)
     }
-    open func fetchone() -> Row? {
+    public func fetchone() -> Row? {
         guard let resultPointer=resultPointer else {
             return nil
         }
@@ -138,18 +138,18 @@ open class Cursor : Sequence, IteratorProtocol {
         return Row(resultPointer: resultPointer, columns: self.columns)
         
     }
-    open func next() -> Row? {
+    public func next() -> Row? {
         return fetchone()
     }
     
-    open var count: Int {
+    public var count: Int {
         guard let resultPointer=self.resultPointer else {
             return 0
         }
         return Int(OCI_GetRowCount(resultPointer))
     }
     
-    open var columns: [Column] {
+    public var columns: [Column] {
         if _columns == nil {
             _columns = get_columns()
         }
