@@ -40,7 +40,7 @@ public class Field {
             }
         default:
             assert(0==1,"bad value \(type)")
-            return "asd" as AnyObject
+            return "asd" as! AnyObject
         }
     }
 }
