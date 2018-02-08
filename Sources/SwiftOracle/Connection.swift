@@ -81,7 +81,7 @@ public class Connection {
     }
     
     func close() {
-        guard let connection != nil else {
+        guard let connection = connection else {
             return
         }
         OCI_ConnectionFree(connection)
